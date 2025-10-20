@@ -1,9 +1,15 @@
 /**
  * HashTable.cpp
  *
- * Grant Rynders - Project 4 - CS3100
+ * Author: Grant Rynders
+ * Class: CS3100
+ * Professor: James Anderson
+ * Assignment: Project 4
+ * Date Created 10/20/25
+ *
  */
 #include "HashTable.h"
+#include "HashTableBucket.h"
 #include <optional>
 #include <string>
 #include <ostream>
@@ -30,9 +36,9 @@ HashTable::HashTable(size_t initCapacity)
  * @param value
  * @return bool
  */
-bool insert(std::string key, size_t value)
+bool HashTable::insert(std::string key, size_t value)
 {
-    return;
+    return false;
 }
 /**
  * If the key is in the table, remove will “erase” the key-value pair from the
@@ -41,9 +47,9 @@ bool insert(std::string key, size_t value)
  * @param key
  * @return
  */
-bool remove(std::string key)
+bool HashTable::remove(std::string key)
 {
-    return;
+    return false;
 }
 /**
  * contains returns true if the key is in the table and false if the key is not in
@@ -52,9 +58,9 @@ bool remove(std::string key)
  * @param key
  * @return
  */
-bool contains(std::string key) const
+bool HashTable::contains(std::string key) const
 {
-    return;
+    return false;
 }
 /**
  * If the key is found in the table, find will return the value associated with
@@ -68,7 +74,7 @@ bool contains(std::string key) const
  * @param key
  * @return
  */
-std::optional<int> get(const std::string& key) const
+std::optional<int> HashTable::get(const std::string& key) const
 {
     return;
 }
@@ -88,7 +94,7 @@ std::optional<int> get(const std::string& key) const
  * @param key
  * @return
  */
-int& operator[](const std::string& key)
+int& HashTable::operator[](const std::string& key)
 {
     return;
 }
@@ -141,13 +147,28 @@ size_t HashTable::size() const
     return;
 }
 /**
- *
+ * operator<< is another example of operator overloading in C++, similar to
+ * operator[]. The friend keyword only needs to appear in the class declaration,
+ * but not the definition. In addition, operator<< is not a method of HashTable,
+ * so do not put HashTable:: before it when defining it. operator<< will allow us
+ * to print the contents of our hash table using the normal syntax:
+ *  cout << myHashTable << endl;
+ * You should only print the buckets which are occupied,
+ * and along with each item you will print which bucket (the index of the bucket)
+ * the item is in. To make it easy, I suggest creating a helper method called
+ * something like printMe() that returns a string of everything in the table. An
+ * example which uses open addressing for collision resolution could print
+ * something like:
+ *  Bucket 5: <James, 4815>
+ *  Bucket 2: <Juliet, 1623>
+ *  Bucket
+ * 11: <Hugo, 42108>
  *
  * @param os
- * @param ht
+ * @param hashTable
  * @return
  */
-std::ostream& operator<<(std::ostream& os, const HashTable& ht)
+std::ostream& operator<<(std::ostream& os, const HashTable& hashTable)
 {
     return os;
 }

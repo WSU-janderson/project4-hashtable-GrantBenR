@@ -1,7 +1,12 @@
 /**
  * HashTable.h
  *
- * Grant Rynders - CS3100 - Project 4
+ * Author: Grant Rynders
+ * Class: CS3100
+ * Professor: James Anderson
+ * Assignment: Project 4
+ * Date Created 10/20/25
+ *
  */
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
@@ -25,6 +30,6 @@ class HashTable
         double alpha() const;
         size_t capacity() const;
         size_t size() const;
-        friend std::ostream& operator<<(std::ostream& os, const HashTable& ht);
+        friend std::ostream& operator<<(std::ostream& os, const HashTable& hashTable);
 };
 #endif
