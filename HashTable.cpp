@@ -24,7 +24,7 @@
  */
 HashTable::HashTable(size_t initCapacity)
 {
-
+    this->table = new std::vector<std::string>(initCapacity);
 }
 /**
  * Insert a new key-value pair into the table. Duplicate keys are NOT allowed. The
@@ -108,7 +108,7 @@ int& HashTable::operator[](const std::string& key)
  */
 std::vector<std::string> HashTable::keys() const
 {
-    return;
+    return *(this->table);
 }
 /**
  * alpha returns the current load factor of the table, or size/capacity. Since
@@ -122,7 +122,16 @@ std::vector<std::string> HashTable::keys() const
  */
 double HashTable::alpha() const
 {
-    return;
+    if (this->capacity() != 0)
+    {
+        const double size_double = static_cast<double>(this->size());
+        const double capacity_double = static_cast<double>(this->capacity());
+        return size_double / capacity_double;
+    }
+    else
+    {
+        throw std::runtime_error("HashTable::alpha() capacity cannot be zero");
+    }
 }
 
 /**
@@ -133,7 +142,7 @@ double HashTable::alpha() const
  */
 size_t HashTable::capacity() const
 {
-    return;
+    return this->table->capacity();
 }
 
 /**
@@ -144,7 +153,7 @@ size_t HashTable::capacity() const
  */
 size_t HashTable::size() const
 {
-    return;
+    return this->table->size();
 }
 /**
  * operator<< is another example of operator overloading in C++, similar to

@@ -18,7 +18,7 @@
 class HashTable
 {
     private:
-
+        std::vector<std::string>* table;
     public:
         HashTable(size_t initCapacity=8);
         bool insert(std::string key, size_t value);
