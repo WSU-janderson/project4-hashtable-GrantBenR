@@ -115,7 +115,7 @@ size_t HashTableBucket::getValue() const
  *
  * @return
  */
-size_t& HashTableBucket::getValueRef() const
+size_t& HashTableBucket::getValueRef()
 {
     return this->value;
 }

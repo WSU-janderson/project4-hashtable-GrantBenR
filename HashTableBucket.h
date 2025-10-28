@@ -43,7 +43,7 @@ class HashTableBucket
         bool isEmptySinceStart() const;
         bool isEmptyAfterRemove() const;
         size_t getValue() const;
-        size_t& getValueRef() const;
+        size_t& getValueRef();
         // SETTERS
         void setNormal();
         void setEmptySinceStart();
