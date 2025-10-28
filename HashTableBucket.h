@@ -32,9 +32,9 @@ class HashTableBucket
     public:
         // CONSTRUCTORS
         HashTableBucket();
-        HashTableBucket(std::string key, int value);
+        HashTableBucket(std::string key, size_t value);
         // METHODS
-        void load(std::string key, int value);
+        void load(std::string key, size_t value);
         // GETTERS
         BucketType getBucketType() const;
         std::string getKey() const;

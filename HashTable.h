@@ -15,16 +15,25 @@
 #include <string>
 #include <ostream>
 #include <vector>
+
+#include "HashTableBucket.h"
+
 class HashTable
 {
     private:
-        std::vector<std::string>* table;
+        std::vector<HashTableBucket>* tableData;
+        std::vector<size_t> probeOffsets;
+        void setSize(size_t newSize);
+        bool checkTableSize();
+        void setProbeOffsets(size_t N=8);
+        size_t hash(const std::string& str, size_t multiplier=3567);
+        static const std::hash<std::string> hasher;
     public:
         HashTable(size_t initCapacity=8);
         bool insert(std::string key, size_t value);
         bool remove(std::string key);
         bool contains(std::string key) const;
-        std::optional<int> get(const std::string& key) const;
+        std::optional<size_t> get(const std::string& key) const;
         int& operator[](const std::string& key);
         std::vector<std::string> keys() const;
         double alpha() const;

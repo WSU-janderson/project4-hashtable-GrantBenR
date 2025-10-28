@@ -13,8 +13,20 @@
 #include <optional>
 #include <string>
 #include <ostream>
+#include <random>
 #include <vector>
 
+const std::hash<std::string> HashTable::hasher = std::hash<std::string>{};
+
+size_t HashTable::hash(const std::string& str, size_t multiplier)
+{
+    // size_t hash_val = 0;
+    // for (char c : str)
+    // {
+    //     hash_val = (c * multiplier) + hash_val;
+    // }
+    return hasher(str);
+}
 /**
  * Only a single constructor that takes an initial capacity for the table is
  * necessary. If no capacity is given, it defaults to 8 initially
@@ -22,9 +34,9 @@
  * @param initCapacity
  * @return void
  */
-HashTable::HashTable(size_t initCapacity)
+HashTable::HashTable(const size_t initCapacity)
 {
-    this->table = new std::vector<std::string>(initCapacity);
+    this->tableData = new std::vector<HashTableBucket>(initCapacity);
 }
 /**
  * Insert a new key-value pair into the table. Duplicate keys are NOT allowed. The
@@ -38,6 +50,7 @@ HashTable::HashTable(size_t initCapacity)
  */
 bool HashTable::insert(std::string key, size_t value)
 {
+    bool wasTableResized = checkTableSize();
     return false;
 }
 /**
@@ -49,7 +62,15 @@ bool HashTable::insert(std::string key, size_t value)
  */
 bool HashTable::remove(std::string key)
 {
-    return false;
+    if (this->contains(key))
+    {
+        this->tableData->at(0).setEmptyAfterRemove();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 /**
  * contains returns true if the key is in the table and false if the key is not in
@@ -60,13 +81,23 @@ bool HashTable::remove(std::string key)
  */
 bool HashTable::contains(std::string key) const
 {
+    size_t N = this->size();
+    size_t home = 0;
+    for (const size_t offset_val : this->probeOffsets)
+    {
+        const size_t probe_val = (home + offset_val) % N;
+        if (probe_val == 0)
+        {
+            return true;
+        }
+    }
     return false;
 }
 /**
  * If the key is found in the table, find will return the value associated with
  * that key. If the key is not in the table, find will return something called
  * nullopt, which is a special value in C++. The find method returns an
- * optional<int>, which is a way to denote a method might not have a valid value
+ * optional<size_t>, which is a way to denote a method might not have a valid value
  * to return. This approach is nicer than designating a special value, like -1, to
  * signify the return value is invalid. It's also much better than throwing an
  * exception if the key is not found.
@@ -74,9 +105,16 @@ bool HashTable::contains(std::string key) const
  * @param key
  * @return
  */
-std::optional<int> HashTable::get(const std::string& key) const
+std::optional<size_t> HashTable::get(const std::string& key) const
 {
-    return;
+    if (this->contains(key))
+    {
+
+    }
+    else
+    {
+        return std::nullopt;
+    }
 }
 /**
  * The bracket operator lets us access values in the map using a familiar syntax,
@@ -96,7 +134,14 @@ std::optional<int> HashTable::get(const std::string& key) const
  */
 int& HashTable::operator[](const std::string& key)
 {
-    return;
+    if (this->contains(key))
+    {
+        return int&;
+    }
+    else
+    {
+        throw std::out_of_range("Operator[] Error: Key Not Found in Table");
+    }
 }
 
 /**
@@ -108,7 +153,12 @@ int& HashTable::operator[](const std::string& key)
  */
 std::vector<std::string> HashTable::keys() const
 {
-    return *(this->table);
+    std::vector<std::string> return_keys;
+    for (const HashTableBucket& bucket : *(this->tableData))
+    {
+        return_keys.push_back(bucket.getKey());
+    }
+    return return_keys;
 }
 /**
  * alpha returns the current load factor of the table, or size/capacity. Since
@@ -142,18 +192,62 @@ double HashTable::alpha() const
  */
 size_t HashTable::capacity() const
 {
-    return this->table->capacity();
+    return this->tableData->capacity();
 }
 
 /**
  * The size method returns how many key-value pairs are in the hash table. The
- * time complexity for this method must be O(1
+ * time complexity for this method must be O(1)
  *
  * @return
  */
 size_t HashTable::size() const
 {
-    return this->table->size();
+    return this->tableData->size();
+}
+
+/**
+ *
+ * @param newSize
+ */
+void HashTable::setSize(const size_t newSize)
+{
+    this->tableData->resize(newSize);
+    this->setProbeOffsets(newSize);
+}
+
+/**
+ * Updates table size if the alpha is bad
+ *
+ * @return
+ */
+bool HashTable::checkTableSize()
+{
+    // When load factor exceeds 0.5, table must be resized
+    if (this->alpha() >= 0.5)
+    {
+        // Double table size
+        this->setSize(this->size() * 2);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+/**
+ * Get vector<size_t> of size N in a random order
+ *
+ * @return
+ */
+void HashTable::setProbeOffsets(size_t N)
+{
+    std::vector<size_t> offsets = std::vector<size_t>(N);
+    std::iota(offsets.begin(), offsets.end(), 1);
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::shuffle(offsets.begin(), offsets.end(), rng);
+    this->probeOffsets = offsets;
 }
 /**
  * operator<< is another example of operator overloading in C++, similar to
@@ -170,8 +264,7 @@ size_t HashTable::size() const
  * something like:
  *  Bucket 5: <James, 4815>
  *  Bucket 2: <Juliet, 1623>
- *  Bucket
- * 11: <Hugo, 42108>
+ *  Bucket 11: <Hugo, 42108>
  *
  * @param os
  * @param hashTable
@@ -179,5 +272,11 @@ size_t HashTable::size() const
  */
 std::ostream& operator<<(std::ostream& os, const HashTable& hashTable)
 {
+    size_t count = 0;
+    for (const HashTableBucket& bucket : *(hashTable.tableData))
+    {
+        os << "Bucket " << count << ": " << bucket << std::endl;
+        count += 1;
+    }
     return os;
 }

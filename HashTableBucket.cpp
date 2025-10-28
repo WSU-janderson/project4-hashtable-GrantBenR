@@ -25,9 +25,9 @@ HashTableBucket::HashTableBucket()
  * well as set the bucket type to NORMAL.
  *
  * @param key (std::string)
- * @param value (int)
+ * @param value (size_t)
  */
-HashTableBucket::HashTableBucket(std::string key, int value)
+HashTableBucket::HashTableBucket(std::string key, size_t value)
 {
     // This is just a wrapper for load essentially
     // It will fill the bucket and set to NORMAL
@@ -38,9 +38,9 @@ HashTableBucket::HashTableBucket(std::string key, int value)
  * should then also mark the bucket as NORMAL.
  *
  * @param key (std::string)
- * @param value (int)
+ * @param value (size_t)
  */
-void HashTableBucket::load(std::string key, int value)
+void HashTableBucket::load(std::string key, size_t value)
 {
     this->setKey(std::move(key));
     this->setValue(value);
@@ -159,32 +159,52 @@ void HashTableBucket::setValue(const size_t input_value)
  */
 HashTableBucket& HashTableBucket::operator=(const HashTableBucket& bucket)
 {
-    this->bucketType = bucket.bucketType;
-    this->key = bucket.key;
-    this->value = bucket.value;
+    this->bucketType = bucket.getBucketType();
+    this->key = bucket.getKey();
+    this->value = bucket.getValue();
     return *this;
 }
+/**
+ *
+ * @param bucket
+ * @return
+ */
 bool HashTableBucket::operator==(const HashTableBucket& bucket) const
 {
-    const bool areBucketTypesEqual = (this->bucketType == bucket.bucketType);
-    const bool areKeysEqual = (this->key == bucket.key);
-    const bool areValuesEqual = (this->value == bucket.value);
+    const bool areBucketTypesEqual = (this->getBucketType() == bucket.getBucketType());
+    const bool areKeysEqual = (this->getKey() == bucket.getKey());
+    const bool areValuesEqual = (this->getValue() == bucket.getValue());
     return (areBucketTypesEqual && areKeysEqual && areValuesEqual);
 }
+/**
+ *
+ * @param bucket
+ * @return
+ */
 bool HashTableBucket::operator!=(const HashTableBucket& bucket) const
 {
-    const bool areBucketTypesEqual = (this->bucketType == bucket.bucketType);
-    const bool areKeysEqual = (this->key == bucket.key);
-    const bool areValuesEqual = (this->value == bucket.value);
+    const bool areBucketTypesEqual = (this->getBucketType() == bucket.getBucketType());
+    const bool areKeysEqual = (this->getKey() == bucket.getKey());
+    const bool areValuesEqual = (this->getValue() == bucket.getValue());
     return !(areBucketTypesEqual && areKeysEqual && areValuesEqual);
 }
+/**
+ *
+ * @param bucket
+ * @return
+ */
 bool HashTableBucket::operator<(const HashTableBucket& bucket) const
 {
-    return (this->value < bucket.value);
+    return (this->getValue() < bucket.getValue());
 }
+/**
+ *
+ * @param bucket
+ * @return
+ */
 bool HashTableBucket::operator>(const HashTableBucket& bucket) const
 {
-    return (this->value > bucket.value);
+    return (this->getValue() > bucket.getValue());
 }
 /**
  * The stream insertion operator could be overloaded to print the
@@ -197,5 +217,23 @@ bool HashTableBucket::operator>(const HashTableBucket& bucket) const
  */
 std::ostream& operator<<(std::ostream& os, const HashTableBucket& bucket)
 {
+    os << "<";
+    if (bucket.getBucketType() == BucketType::NORMAL)
+    {
+        os << bucket.getKey() << ", " << bucket.getValue();
+    }
+    else if (bucket.getBucketType() == BucketType::ESS)
+    {
+        os << "EES";
+    }
+    else if (bucket.getBucketType() == BucketType::EAR)
+    {
+        os << "EAR";
+    }
+    else
+    {
+        throw std::runtime_error("Operator<<: Bucket type is not supported");
+    }
+    os << ">";
     return os;
 }
