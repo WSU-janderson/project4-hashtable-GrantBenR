@@ -18,7 +18,12 @@
 
 const std::hash<std::string> HashTable::hasher = std::hash<std::string>{};
 
-size_t HashTable::hash(const std::string& str, size_t multiplier)
+/**
+ *
+ * @param str
+ * @return
+ */
+size_t HashTable::hash(const std::string& str) const
 {
     // size_t hash_val = 0;
     // for (char c : str)
@@ -36,7 +41,7 @@ size_t HashTable::hash(const std::string& str, size_t multiplier)
  */
 HashTable::HashTable(const size_t initCapacity)
 {
-    this->tableData = new std::vector<HashTableBucket>(initCapacity);
+    this->tableData = new std::vector<std::vector<HashTableBucket>>(initCapacity);
 }
 /**
  * Insert a new key-value pair into the table. Duplicate keys are NOT allowed. The
@@ -50,8 +55,21 @@ HashTable::HashTable(const size_t initCapacity)
  */
 bool HashTable::insert(std::string key, size_t value)
 {
-    bool wasTableResized = checkTableSize();
-    return false;
+    // Check if key already exists
+    for (HashTableBucket &bucket : this->tableData->at(this->hash(key)))
+    {
+        if (bucket.getKey() == key)
+        {
+            // Update value
+            bucket.setValue(value);
+            // Make bucketType normal now that there is definitely a value
+            bucket.setNormal();
+            return true;
+        }
+    }
+    // If key does not already exist add it
+    const std::vector<HashTableBucket> newBuckets = {HashTableBucket(key, value)};
+    return this->push_back(newBuckets);
 }
 /**
  * If the key is in the table, remove will “erase” the key-value pair from the
@@ -62,15 +80,21 @@ bool HashTable::insert(std::string key, size_t value)
  */
 bool HashTable::remove(std::string key)
 {
-    if (this->contains(key))
+    // Check if key already exists
+    std::vector<HashTableBucket> at_index = this->tableData->at(this->hash(key));
+    for (HashTableBucket &bucket : at_index)
     {
-        this->tableData->at(0).setEmptyAfterRemove();
-        return true;
+        if (bucket.getKey() == key)
+        {
+            // Update value to default 0
+            bucket.setValue(0);
+            // Update bucketType to EAR
+            bucket.setEmptyAfterRemove();
+            return true;
+        }
     }
-    else
-    {
-        return false;
-    }
+    // If key does not already exist
+    return false;
 }
 /**
  * contains returns true if the key is in the table and false if the key is not in
@@ -81,16 +105,16 @@ bool HashTable::remove(std::string key)
  */
 bool HashTable::contains(std::string key) const
 {
-    size_t N = this->size();
-    size_t home = 0;
-    for (const size_t offset_val : this->probeOffsets)
+    // Check if key already exists
+    std::vector<HashTableBucket> at_index = this->tableData->at(this->hash(key));
+    for (HashTableBucket &bucket : at_index)
     {
-        const size_t probe_val = (home + offset_val) % N;
-        if (probe_val == 0)
+        if (bucket.getKey() == key)
         {
             return true;
         }
     }
+    // If key does not already exist
     return false;
 }
 /**
@@ -107,14 +131,16 @@ bool HashTable::contains(std::string key) const
  */
 std::optional<size_t> HashTable::get(const std::string& key) const
 {
-    if (this->contains(key))
+    // Check if key already exists
+    std::vector<HashTableBucket> at_index = this->tableData->at(this->hash(key));
+    for (HashTableBucket &bucket : at_index)
     {
-
+        if (bucket.getKey() == key)
+        {
+            return bucket.getValue();
+        }
     }
-    else
-    {
-        return std::nullopt;
-    }
+    return std::nullopt;
 }
 /**
  * The bracket operator lets us access values in the map using a familiar syntax,
@@ -132,16 +158,18 @@ std::optional<size_t> HashTable::get(const std::string& key) const
  * @param key
  * @return
  */
-int& HashTable::operator[](const std::string& key)
+size_t& HashTable::operator[](const std::string& key)
 {
-    if (this->contains(key))
+    // Check if key already exists
+    std::vector<HashTableBucket> at_index = this->tableData->at(this->hash(key));
+    for (HashTableBucket &bucket : at_index)
     {
-        return int&;
+        if (bucket.getKey() == key)
+        {
+            return bucket.getValueRef();
+        }
     }
-    else
-    {
-        throw std::out_of_range("Operator[] Error: Key Not Found in Table");
-    }
+    throw std::runtime_error("Operator[]: Table[Key] not found");
 }
 
 /**
@@ -154,11 +182,26 @@ int& HashTable::operator[](const std::string& key)
 std::vector<std::string> HashTable::keys() const
 {
     std::vector<std::string> return_keys;
-    for (const HashTableBucket& bucket : *(this->tableData))
+    for (std::vector<HashTableBucket> &bucket_group : *(this->tableData))
     {
-        return_keys.push_back(bucket.getKey());
+        for (const HashTableBucket& bucket : bucket_group)
+        {
+            return_keys.push_back(bucket.getKey());
+        }
     }
     return return_keys;
+}
+
+/**
+ *
+ * @param newBuckets
+ * @return
+ */
+bool HashTable::push_back(const std::vector<HashTableBucket>& newBuckets)
+{
+    this->tableData->push_back(newBuckets);
+    bool wasTableSizeChanged = this->checkTableSize();
+    return true;
 }
 /**
  * alpha returns the current load factor of the table, or size/capacity. Since
@@ -272,11 +315,12 @@ void HashTable::setProbeOffsets(size_t N)
  */
 std::ostream& operator<<(std::ostream& os, const HashTable& hashTable)
 {
-    size_t count = 0;
-    for (const HashTableBucket& bucket : *(hashTable.tableData))
+    for (std::vector<HashTableBucket> &bucket_group : *(hashTable.tableData))
     {
-        os << "Bucket " << count << ": " << bucket << std::endl;
-        count += 1;
+        for (const HashTableBucket& bucket : bucket_group)
+        {
+            os << "Bucket " << hashTable.hash(bucket.getKey()) << ": " << bucket << std::endl;
+        }
     }
     return os;
 }

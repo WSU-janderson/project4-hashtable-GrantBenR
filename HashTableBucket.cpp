@@ -113,6 +113,14 @@ size_t HashTableBucket::getValue() const
 }
 /**
  *
+ * @return
+ */
+size_t& HashTableBucket::getValueRef() const
+{
+    return this->value;
+}
+/**
+ *
  * @param val
  */
 void HashTableBucket::setNormal()
