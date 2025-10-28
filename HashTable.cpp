@@ -15,6 +15,7 @@
 #include <ostream>
 #include <random>
 #include <vector>
+#include <algorithm>
 
 const std::hash<std::string> HashTable::hasher = std::hash<std::string>{};
 
