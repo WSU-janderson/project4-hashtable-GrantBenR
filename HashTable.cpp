@@ -236,7 +236,7 @@ bool HashTable::push_back(const std::vector<HashTableBucket>& newBuckets)
 {
     this->tableData->push_back(newBuckets);
     bool wasTableResized = this->resize_table();
-    std::cout << "Table after push back:\n" << this->tableData << std::endl;
+    std::cout << "Table after push back:\n" << &(this->tableData) << std::endl;
     return true;
 }
 /**
