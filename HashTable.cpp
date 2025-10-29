@@ -33,6 +33,26 @@ size_t HashTable::hash(const std::string& str) const
     // }
     return hasher(str);
 }
+size_t HashTable::get_index(const std::string& key) const
+{
+    return this->hash(key) % this->size();
+}
+std::vector<HashTableBucket> HashTable::get_bucket_group(const std::string& key) const
+{
+    return this->tableData->at(this->get_index(key));
+}
+std::optional<HashTableBucket> HashTable::get_bucket(const std::string& key) const
+{
+    // Check if key already exists
+    for (HashTableBucket &bucket : get_bucket_group(key))
+    {
+        if (bucket.getKey() == key)
+        {
+            return bucket;
+        }
+    }
+    return std::nullopt;
+}
 /**
  * Only a single constructor that takes an initial capacity for the table is
  * necessary. If no capacity is given, it defaults to 8 initially
@@ -57,29 +77,20 @@ HashTable::HashTable(const size_t initCapacity)
 bool HashTable::insert(std::string key, size_t value)
 {
     // Check if key already exists
-    // for (HashTableBucket &bucket : this->tableData->at(this->hash(key)))
-    // {
-    //     if (bucket.getKey() == key)
-    //     {
-    //         // Update value
-    //         bucket.setValue(value);
-    //         // Make bucketType normal now that there is definitely a value
-    //         bucket.setNormal();
-    //         return true;
-    //     }
-    // }
-    bucket = this->getBucket(key);
-    if (bucket.getKey() == key)
+    std::optional<HashTableBucket> bucket = get_bucket(key);
+    if (bucket != std::nullopt)
     {
-        // Update value
-        bucket.setValue(value);
-        // Make bucketType normal now that there is definitely a value
-        bucket.setNormal();
-        return true;
+        bucket->setValue(value);
+        bucket->setNormal();
+        return false;
     }
-    // If key does not already exist add it
-    const std::vector<HashTableBucket> newBuckets = {HashTableBucket(key, value)};
-    return this->push_back(newBuckets);
+    else
+    {
+        // If key does not already exist add it
+        const std::vector<HashTableBucket> newBuckets = {HashTableBucket(key, value)};
+        return this->push_back(newBuckets);
+    }
+
 }
 /**
  * If the key is in the table, remove will “erase” the key-value pair from the
@@ -91,17 +102,14 @@ bool HashTable::insert(std::string key, size_t value)
 bool HashTable::remove(std::string key)
 {
     // Check if key already exists
-    std::vector<HashTableBucket> at_index = this->tableData->at(this->hash(key));
-    for (HashTableBucket &bucket : at_index)
+    std::optional<HashTableBucket> bucket = get_bucket(key);
+    if (bucket != std::nullopt)
     {
-        if (bucket.getKey() == key)
-        {
-            // Update value to default 0
-            bucket.setValue(0);
-            // Update bucketType to EAR
-            bucket.setEmptyAfterRemove();
-            return true;
-        }
+        // Update value to default 0
+        bucket->setValue(0);
+        // Update bucketType to EAR
+        bucket->setEmptyAfterRemove();
+        return true;
     }
     // If key does not already exist
     return false;
@@ -116,8 +124,7 @@ bool HashTable::remove(std::string key)
 bool HashTable::contains(std::string key) const
 {
     // Check if key already exists
-    std::vector<HashTableBucket> at_index = this->tableData->at(this->hash(key));
-    for (HashTableBucket &bucket : at_index)
+    for (HashTableBucket &bucket : get_bucket_group(key))
     {
         if (bucket.getKey() == key)
         {
@@ -141,16 +148,15 @@ bool HashTable::contains(std::string key) const
  */
 std::optional<size_t> HashTable::get(const std::string& key) const
 {
-    // Check if key already exists
-    std::vector<HashTableBucket> at_index = this->tableData->at(this->hash(key));
-    for (HashTableBucket &bucket : at_index)
+    std::optional<HashTableBucket> bucket = get_bucket(key);
+    if (bucket != std::nullopt)
     {
-        if (bucket.getKey() == key)
-        {
-            return bucket.getValue();
-        }
+        return bucket->getValue();
     }
-    return std::nullopt;
+    else
+    {
+        return std::nullopt;
+    }
 }
 /**
  * The bracket operator lets us access values in the map using a familiar syntax,
@@ -171,15 +177,15 @@ std::optional<size_t> HashTable::get(const std::string& key) const
 size_t& HashTable::operator[](const std::string& key)
 {
     // Check if key already exists
-    std::vector<HashTableBucket> at_index = this->tableData->at(this->hash(key));
-    for (HashTableBucket &bucket : at_index)
+    std::optional<HashTableBucket> bucket = get_bucket(key);
+    if (bucket != std::nullopt)
     {
-        if (bucket.getKey() == key)
-        {
-            return bucket.getValueRef();
-        }
+        return bucket->getValueRef();
     }
-    throw std::runtime_error("Operator[]: Table[Key] not found");
+    else
+    {
+        throw std::runtime_error("Operator[]: Table[Key] not found");
+    }
 }
 
 /**
@@ -210,7 +216,7 @@ std::vector<std::string> HashTable::keys() const
 bool HashTable::push_back(const std::vector<HashTableBucket>& newBuckets)
 {
     this->tableData->push_back(newBuckets);
-    bool wasTableSizeChanged = this->checkTableSize();
+    bool wasTableSizeChanged = this->resizeTable();
     return true;
 }
 /**
@@ -274,7 +280,7 @@ void HashTable::setSize(const size_t newSize)
  *
  * @return
  */
-bool HashTable::checkTableSize()
+bool HashTable::resizeTable()
 {
     // When load factor exceeds 0.5, table must be resized
     if (this->alpha() >= 0.5)
