@@ -57,16 +57,25 @@ HashTable::HashTable(const size_t initCapacity)
 bool HashTable::insert(std::string key, size_t value)
 {
     // Check if key already exists
-    for (HashTableBucket &bucket : this->tableData->at(this->hash(key)))
+    // for (HashTableBucket &bucket : this->tableData->at(this->hash(key)))
+    // {
+    //     if (bucket.getKey() == key)
+    //     {
+    //         // Update value
+    //         bucket.setValue(value);
+    //         // Make bucketType normal now that there is definitely a value
+    //         bucket.setNormal();
+    //         return true;
+    //     }
+    // }
+    bucket = this->getBucket(key);
+    if (bucket.getKey() == key)
     {
-        if (bucket.getKey() == key)
-        {
-            // Update value
-            bucket.setValue(value);
-            // Make bucketType normal now that there is definitely a value
-            bucket.setNormal();
-            return true;
-        }
+        // Update value
+        bucket.setValue(value);
+        // Make bucketType normal now that there is definitely a value
+        bucket.setNormal();
+        return true;
     }
     // If key does not already exist add it
     const std::vector<HashTableBucket> newBuckets = {HashTableBucket(key, value)};
