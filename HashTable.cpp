@@ -80,7 +80,9 @@ bool HashTable::insert(std::string key, size_t value)
     std::optional<HashTableBucket> bucket = get_bucket(key);
     if (bucket != std::nullopt)
     {
+        // Update value of bucket
         bucket->setValue(value);
+        // Set bucket type to normal
         bucket->setNormal();
         return false;
     }
@@ -151,12 +153,12 @@ std::optional<size_t> HashTable::get(const std::string& key) const
     std::optional<HashTableBucket> bucket = get_bucket(key);
     if (bucket != std::nullopt)
     {
-        return bucket->getValue();
+        if (bucket->isNormal())
+        {
+            return bucket->getValue();
+        }
     }
-    else
-    {
-        return std::nullopt;
-    }
+    return std::nullopt;
 }
 /**
  * The bracket operator lets us access values in the map using a familiar syntax,
