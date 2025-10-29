@@ -53,6 +53,23 @@ std::optional<HashTableBucket> HashTable::get_bucket(const std::string& key) con
     }
     return std::nullopt;
 }
+bool HashTable::update(const std::string& key, size_t value)
+{
+    // Check if key already exists
+    std::optional<HashTableBucket> bucket = get_bucket(key);
+    if (bucket != std::nullopt)
+    {
+        // Update value of bucket
+        bucket->setValue(value);
+        // Set bucket type to normal
+        bucket->setNormal();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 /**
  * Only a single constructor that takes an initial capacity for the table is
  * necessary. If no capacity is given, it defaults to 8 initially
@@ -80,10 +97,10 @@ bool HashTable::insert(std::string key, size_t value)
     std::optional<HashTableBucket> bucket = get_bucket(key);
     if (bucket != std::nullopt)
     {
-        // Update value of bucket
-        bucket->setValue(value);
-        // Set bucket type to normal
-        bucket->setNormal();
+        // // Update value of bucket
+        // bucket->setValue(value);
+        // // Set bucket type to normal
+        // bucket->setNormal();
         return false;
     }
     else
@@ -92,7 +109,6 @@ bool HashTable::insert(std::string key, size_t value)
         const std::vector<HashTableBucket> newBuckets = {HashTableBucket(key, value)};
         return this->push_back(newBuckets);
     }
-
 }
 /**
  * If the key is in the table, remove will “erase” the key-value pair from the
@@ -218,7 +234,7 @@ std::vector<std::string> HashTable::keys() const
 bool HashTable::push_back(const std::vector<HashTableBucket>& newBuckets)
 {
     this->tableData->push_back(newBuckets);
-    bool wasTableSizeChanged = this->resizeTable();
+    bool wasTableResized = this->resize_table();
     return true;
 }
 /**
@@ -271,10 +287,10 @@ size_t HashTable::size() const
  *
  * @param newSize
  */
-void HashTable::setSize(const size_t newSize)
+void HashTable::set_size(const size_t newSize)
 {
     this->tableData->resize(newSize);
-    this->setProbeOffsets(newSize);
+    this->set_probe_offsets(newSize);
 }
 
 /**
@@ -282,13 +298,13 @@ void HashTable::setSize(const size_t newSize)
  *
  * @return
  */
-bool HashTable::resizeTable()
+bool HashTable::resize_table()
 {
     // When load factor exceeds 0.5, table must be resized
     if (this->alpha() >= 0.5)
     {
         // Double table size
-        this->setSize(this->size() * 2);
+        this->set_size(this->size() * 2);
         return true;
     }
     else
@@ -301,7 +317,7 @@ bool HashTable::resizeTable()
  *
  * @return
  */
-void HashTable::setProbeOffsets(size_t N)
+void HashTable::set_probe_offsets(size_t N)
 {
     std::vector<size_t> offsets = std::vector<size_t>(N);
     std::iota(offsets.begin(), offsets.end(), 1);

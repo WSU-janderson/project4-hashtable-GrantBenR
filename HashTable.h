@@ -23,9 +23,9 @@ class HashTable
     private:
         std::vector<std::vector<HashTableBucket>>* tableData;
         std::vector<size_t> probeOffsets;
-        void setSize(size_t newSize);
-        bool resizeTable();
-        void setProbeOffsets(size_t N=8);
+        void set_size(size_t newSize);
+        bool resize_table();
+        void set_probe_offsets(size_t N=8);
         size_t hash(const std::string& str) const;
         size_t get_index(const std::string& key) const;
         std::vector<HashTableBucket> get_bucket_group(const std::string& key) const;
@@ -35,6 +35,7 @@ class HashTable
     public:
         HashTable(size_t initCapacity=8);
         bool insert(std::string key, size_t value);
+        bool update(const std::string& key, size_t value);
         bool remove(std::string key);
         bool contains(std::string key) const;
         std::optional<size_t> get(const std::string& key) const;

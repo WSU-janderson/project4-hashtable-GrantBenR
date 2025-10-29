@@ -16,10 +16,7 @@
 /**
  * The default constructor can simply set the bucket type to ESS.
  */
-HashTableBucket::HashTableBucket()
-{
-    this->bucketType = BucketType::ESS;
-}
+HashTableBucket::HashTableBucket() : bucket_type(BucketType::ESS){}
 /**
  * A parameterized constructor could initialize the key and value, as
  * well as set the bucket type to NORMAL.
@@ -27,12 +24,7 @@ HashTableBucket::HashTableBucket()
  * @param key (std::string)
  * @param value (size_t)
  */
-HashTableBucket::HashTableBucket(std::string key, size_t value)
-{
-    // This is just a wrapper for load essentially
-    // It will fill the bucket and set to NORMAL
-    this->load(std::move(key), value);
-}
+HashTableBucket::HashTableBucket(std::string key, size_t value) : bucket_type(BucketType::NORMAL), bucket_key(key), bucket_value(value){}
 /**
  * A load method could load the key-value pair into the bucket, which
  * should then also mark the bucket as NORMAL.
@@ -93,7 +85,7 @@ bool HashTableBucket::isEmptyAfterRemove() const
  */
 BucketType HashTableBucket::getBucketType() const
 {
-    return this->bucketType;
+    return this->bucket_type;
 }
 /**
  *
@@ -101,7 +93,7 @@ BucketType HashTableBucket::getBucketType() const
  */
 std::string HashTableBucket::getKey() const
 {
-    return this->key;
+    return this->bucket_key;
 }
 /**
  *
@@ -109,7 +101,7 @@ std::string HashTableBucket::getKey() const
  */
 size_t HashTableBucket::getValue() const
 {
-    return this->value;
+    return this->bucket_value;
 }
 /**
  *
@@ -117,7 +109,7 @@ size_t HashTableBucket::getValue() const
  */
 size_t& HashTableBucket::getValueRef()
 {
-    return this->value;
+    return this->bucket_value;
 }
 /**
  *
@@ -125,7 +117,7 @@ size_t& HashTableBucket::getValueRef()
  */
 void HashTableBucket::setNormal()
 {
-    this->bucketType = BucketType::NORMAL;
+    this->bucket_type = BucketType::NORMAL;
 }
 /**
  *
@@ -133,7 +125,7 @@ void HashTableBucket::setNormal()
  */
 void HashTableBucket::setEmptySinceStart()
 {
-    this->bucketType = BucketType::ESS;
+    this->bucket_type = BucketType::ESS;
 }
 
 /**
@@ -142,7 +134,7 @@ void HashTableBucket::setEmptySinceStart()
  */
 void HashTableBucket::setEmptyAfterRemove()
 {
-    this->bucketType = BucketType::EAR;
+    this->bucket_type = BucketType::EAR;
 }
 /**
  *
@@ -150,7 +142,7 @@ void HashTableBucket::setEmptyAfterRemove()
  */
 void HashTableBucket::setKey(std::string key_value)
 {
-    this->key = std::move(key_value);
+    this->bucket_key = std::move(key_value);
 }
 /**
  *
@@ -158,7 +150,7 @@ void HashTableBucket::setKey(std::string key_value)
  */
 void HashTableBucket::setValue(const size_t input_value)
 {
-    this->value = input_value;
+    this->bucket_value = input_value;
 }
 /**
  *
@@ -167,9 +159,9 @@ void HashTableBucket::setValue(const size_t input_value)
  */
 HashTableBucket& HashTableBucket::operator=(const HashTableBucket& bucket)
 {
-    this->bucketType = bucket.getBucketType();
-    this->key = bucket.getKey();
-    this->value = bucket.getValue();
+    this->bucket_type = bucket.getBucketType();
+    this->bucket_key = bucket.getKey();
+    this->bucket_value = bucket.getValue();
     return *this;
 }
 /**

@@ -26,9 +26,9 @@ enum class BucketType {NORMAL, ESS, EAR};
 class HashTableBucket
 {
     private:
-        BucketType bucketType;
-        std::string key;
-        size_t value;
+        BucketType bucket_type;
+        std::string bucket_key;
+        size_t bucket_value;
     public:
         // CONSTRUCTORS
         HashTableBucket();
