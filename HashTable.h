@@ -24,15 +24,18 @@ class HashTable
         std::vector<std::vector<HashTableBucket>>* tableData;
         std::vector<size_t> probeOffsets;
         void set_size(size_t newSize);
+        bool rehash_table(size_t new_capacity);
         bool resize_table();
         void set_probe_offsets(size_t N=8);
         size_t hash(const std::string& str) const;
-        size_t get_index(const std::string& key) const;
-        std::vector<HashTableBucket> get_bucket_group(const std::string& key) const;
-        std::optional<HashTableBucket> get_bucket(const std::string& key) const;
+        std::vector<HashTableBucket>& get_bucket_group(const std::string& key);
+        std::optional<std::reference_wrapper<HashTableBucket>> get_bucket(const std::string& key);
+        std::optional<std::reference_wrapper<HashTableBucket>> get_bucket(const std::string& key) const;
         bool push_back(const std::vector<HashTableBucket>& newBuckets);
         static const std::hash<std::string> hasher;
     public:
+        size_t get_index(const std::string& key, size_t modulo) const;
+        std::vector<HashTableBucket>& get_bucket_group(const std::string& key) const;
         HashTable(size_t initCapacity=8);
         bool insert(std::string key, size_t value);
         bool update(const std::string& key, size_t value);
