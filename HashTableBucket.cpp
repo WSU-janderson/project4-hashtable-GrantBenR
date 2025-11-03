@@ -16,7 +16,7 @@
 /**
  * The default constructor can simply set the bucket type to ESS.
  */
-HashTableBucket::HashTableBucket() : bucket_type(BucketType::ESS){}
+HashTableBucket::HashTableBucket() : bucket_type(BucketType::ESS), bucket_value(0){}
 /**
  * A parameterized constructor could initialize the key and value, as
  * well as set the bucket type to NORMAL.
@@ -88,6 +88,7 @@ BucketType HashTableBucket::getBucketType() const
     return this->bucket_type;
 }
 /**
+ * Getter for this->bucket_key
  *
  * @return
  */
@@ -96,6 +97,7 @@ std::string HashTableBucket::getKey() const
     return this->bucket_key;
 }
 /**
+ * Getter for this->bucket_value
  *
  * @return
  */
@@ -104,6 +106,7 @@ size_t HashTableBucket::getValue() const
     return this->bucket_value;
 }
 /**
+ * Getter for reference to this->bucket_value
  *
  * @return
  */
@@ -112,16 +115,14 @@ size_t& HashTableBucket::getValueRef()
     return this->bucket_value;
 }
 /**
- *
- * @param val
+ * Sets bucket_type to normal
  */
 void HashTableBucket::setNormal()
 {
     this->bucket_type = BucketType::NORMAL;
 }
 /**
- *
- * @param val
+ * Sets bucket_type to empty since start
  */
 void HashTableBucket::setEmptySinceStart()
 {
@@ -129,15 +130,14 @@ void HashTableBucket::setEmptySinceStart()
 }
 
 /**
- *
- * @param val
+ * Sets bucket_type to empty after removal
  */
 void HashTableBucket::setEmptyAfterRemove()
 {
     this->bucket_type = BucketType::EAR;
 }
 /**
- *
+ * Setter for bucket key
  * @param key_value
  */
 void HashTableBucket::setKey(std::string key_value)
@@ -145,7 +145,7 @@ void HashTableBucket::setKey(std::string key_value)
     this->bucket_key = std::move(key_value);
 }
 /**
- *
+ * Setter for bucket value
  * @param input_value
  */
 void HashTableBucket::setValue(const size_t input_value)
@@ -153,6 +153,7 @@ void HashTableBucket::setValue(const size_t input_value)
     this->bucket_value = input_value;
 }
 /**
+ * Equals operator for bucket. Simply sets bucket_type, key, and value
  *
  * @param bucket
  * @return
@@ -165,6 +166,7 @@ HashTableBucket& HashTableBucket::operator=(const HashTableBucket& bucket)
     return *this;
 }
 /**
+ * Boolean == operator. Checks bucket_type, key, and value
  *
  * @param bucket
  * @return
@@ -177,6 +179,7 @@ bool HashTableBucket::operator==(const HashTableBucket& bucket) const
     return (areBucketTypesEqual && areKeysEqual && areValuesEqual);
 }
 /**
+ * Boolean != operator. Checks bucket_type, key, and value
  *
  * @param bucket
  * @return
@@ -189,6 +192,7 @@ bool HashTableBucket::operator!=(const HashTableBucket& bucket) const
     return !(areBucketTypesEqual && areKeysEqual && areValuesEqual);
 }
 /**
+ * Compares values of two buckets: less than
  *
  * @param bucket
  * @return
@@ -198,6 +202,7 @@ bool HashTableBucket::operator<(const HashTableBucket& bucket) const
     return (this->getValue() < bucket.getValue());
 }
 /**
+ * Compares values of two buckets: greater than
  *
  * @param bucket
  * @return
@@ -220,7 +225,7 @@ std::ostream& operator<<(std::ostream& os, const HashTableBucket& bucket)
     os << "<";
     if (bucket.getBucketType() == BucketType::NORMAL)
     {
-        os << bucket.getKey() << ", " << bucket.getValue();
+        os << "\"" << bucket.getKey() << "\"," << bucket.getValue();
     }
     else if (bucket.getBucketType() == BucketType::ESS)
     {

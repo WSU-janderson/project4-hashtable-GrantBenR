@@ -18,6 +18,6 @@ add_executable(HashTableTests
         HashTableBucket.cpp
         HashTableBucket.h
 )
-
 # Make SequenceDebug the default startup target
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT HashTableDebug)
+target_compile_options(HashTableTests PRIVATE -fconcepts)
