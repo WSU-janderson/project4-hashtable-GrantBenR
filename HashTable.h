@@ -35,7 +35,6 @@ class HashTable
         std::vector<HashTableBucket>& get_bucket_group(const std::string& key) const;
         std::optional<std::reference_wrapper<HashTableBucket>> get_bucket(const std::string& key);
         std::optional<std::reference_wrapper<HashTableBucket>> get_bucket(const std::string& key) const;
-        bool push_back(const std::vector<HashTableBucket>& newBuckets);
     public:
         HashTable(size_t initCapacity=8);
         bool insert(std::string key, size_t value);

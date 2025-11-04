@@ -8,6 +8,47 @@
  * Date Created 10/20/25
  *
  */
+
+/**
+ * - - - - - - READ ME - - - - - - - - - *
+ * I decided to design my HashTable as a chaining hashtable because I am dumb and I did not know what I was doing.
+ * In lieu of rewriting the whole thing, I figure it would be better to just explain what I did and why it is pretty bad
+ *
+ * Thus the structure looks like the following:
+ *
+ * vector<vector<HashTableBucket>>(10):
+ *
+ * Bucket 0: <EAR>
+ * Bucket 1: <"AGNES",789> <"KEVES",701>
+ * Bucket 2: <"BAT",21> <"KANGAROO",23> <"XENOGEARS",123>
+ * Bucket 3: <EES>
+ * Bucket 4: <"ELHAYM",456>
+ * Bucket 5: <EES>
+ * Bucket 6: <"FEIFONGWONG",56>
+ * Bucket 7: <EES>
+ * Bucket 8: <EES>
+ * Bucket 9: <"WUMBO",41>
+ *
+ * GET
+ * Worst case for just getting a bucket is O(N) since the table is made up of lists, and if you navigate across a
+ * full long list, the complexity is O(N). Typically, buckets only have a couple items or less, and have complexity closer to O(1)
+ *
+ * This is the primary flaw with this model since it shares a lot of the downsides of a linked-list and
+ * though typically better, and it starts to have bigger problems at scale. If each slot in the overall table has a ton
+ * of elements, then you have to search them like a regular list at O(N) complexity.
+ *
+ * INSERT
+ * The best case for inserting into this kind of table is O(1) while the worst case is one with buckets with lots of
+ * elements such that complexity is like that of a linked list: O(N).
+ *
+ * RESIZE
+ * When alpha is greater than 0.5, the table is reindexed which best case has complexity O(N)
+ * and bucket groups with only 1 bucket each.
+ * Again, because each element in the table is a list, if there are several buckets at each index, the complexity
+ * for each is closer to O(N) and the worst case for reindexing is closer to O(N^2)
+ *
+ *
+ */
 #include "HashTable.h"
 #include "HashTableBucket.h"
 #include <optional>
@@ -26,43 +67,48 @@ const std::vector<HashTableBucket> HashTable::BucketGroupDefault = std::vector<H
  * If the alpha is greater than 0.5, we need to double the capacity of the table without modding the size.
  * Old code that completely reindexed the table commented out since it is not necessary.
  *
+ * Average Case Complexity: O(N)
+ * - If each index only contains 1 - 3 buckets it is closer to O(N * 1) than O(N * N)
+ * Worst Case Complexity: O(N^2)
+ * - Consistently lots of buckets in each bucket group O(N * N)
+ *
  * @param new_capacity
  * @return
  */
 bool HashTable::rehash_table(size_t new_capacity)
 {
-    const size_t new_size = this->vector_size() * 2;
+    const size_t new_size = this->vector_size() * 2; // O(1)
     //Create a new table with our new capacity
-    std::vector<std::vector<HashTableBucket>> new_table(new_size, BucketGroupDefault);
+    std::vector<std::vector<HashTableBucket>> new_table(new_size, BucketGroupDefault); // O(1)
     // Because the index of our keys relies on capacity, when we resize the table we need to reindex everything
 
     // Iterate over groups of buckets
-    for (std::vector<HashTableBucket> &bucket_group : *(this->tableData))
+    for (std::vector<HashTableBucket> &bucket_group : *(this->tableData)) // O(N)
     {
         // Check each bucket
-        for (const HashTableBucket& bucket : bucket_group)
+        for (const HashTableBucket& bucket : bucket_group) // O(N) worst
         {
-            std::string bucket_key = bucket.getKey();
-            if (!bucket_key.empty())
+            std::string bucket_key = bucket.getKey(); // O(1)
+            if (!bucket_key.empty()) // O(1)
             {
-                const size_t index = get_index(bucket_key, new_size);
-                if (new_table[index].front().isEmptySinceStart())
+                const size_t index = get_index(bucket_key, new_size); // O(1)
+                if (new_table[index].front().isEmptySinceStart()) // O(1)
                 {
-                    new_table[index].front() = bucket;
+                    new_table[index].front() = bucket; // O(1)
                 }
                 else
                 {
-                    new_table[index].emplace_back(bucket);
+                    new_table[index].emplace_back(bucket); // O(1)
                 }
             }
         }
     }
     // Set tableData to our new table
-    this->tableData->swap(new_table);
+    this->tableData->swap(new_table); // O(1)
     // Double new_capacity
     new_capacity *= 2;
-    this->tableData->reserve(new_capacity);
-    if (this->capacity() == new_capacity)
+    this->tableData->reserve(new_capacity); // O(1)
+    if (this->capacity() == new_capacity) // O(1)
     {
         return true;
     }
@@ -95,6 +141,7 @@ bool HashTable::resize_table()
 /**
  * Get vector<size_t> of size N in a random order
  *
+ *
  * @return
  */
 void HashTable::set_probe_offsets(const size_t N)
@@ -109,6 +156,9 @@ void HashTable::set_probe_offsets(const size_t N)
 /**
  * Hash a string using the builtin static hasher defined above
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @param str
  * @return
  */
@@ -118,6 +168,9 @@ size_t HashTable::hash(const std::string& str) const
 }
 /**
  * Gets the index value for a given string key using the hash() function and modulo input value
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @param key
  * @param modulo
@@ -130,29 +183,38 @@ size_t HashTable::get_index(const std::string& key, const size_t modulo) const
 /**
  * Gets reference to the vector group of buckets at the key's index in the hashtable
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @param key
  * @return
  */
 std::vector<HashTableBucket>& HashTable::get_bucket_group(const std::string& key)
 {
-    const size_t index = this->get_index(key, this->vector_size());
-    std::vector<HashTableBucket>& bucket_group = this->tableData->at(index);
+    const size_t index = this->get_index(key, this->vector_size()); // O(1)
+    std::vector<HashTableBucket>& bucket_group = this->tableData->at(index); // O(1)
     return bucket_group;
 }
 /**
  * Gets const reference to the vector group of buckets at the key's index in the hashtable
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @param key
  * @return
  */
 std::vector<HashTableBucket>& HashTable::get_bucket_group(const std::string& key) const
 {
-    const size_t index = this->get_index(key, this->vector_size());
-    std::vector<HashTableBucket>& bucket_group = this->tableData->at(index);
+    const size_t index = this->get_index(key, this->vector_size()); // O(1)
+    std::vector<HashTableBucket>& bucket_group = this->tableData->at(index); // O(1)
     return bucket_group;
 }
 /**
  * Returns optional reference to a bucket with key at bucket group at an index defined by key
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(N)
  *
  * @param key
  * @return
@@ -160,14 +222,15 @@ std::vector<HashTableBucket>& HashTable::get_bucket_group(const std::string& key
 std::optional<std::reference_wrapper<HashTableBucket>> HashTable::get_bucket(const std::string& key)
 {
     // Check if key already exists
-    std::vector<HashTableBucket>& bucket_group = this->get_bucket_group(key);
+    std::vector<HashTableBucket>& bucket_group = this->get_bucket_group(key); // O(1)
     std::optional<std::reference_wrapper<HashTableBucket>> valid_empty_bucket;
     // Iterate through all the buckets and try and find the bucket with our string key
-    for (HashTableBucket& bucket : bucket_group)
+    for (HashTableBucket& bucket : bucket_group) // O(1) to O(N)
     {
         if (!bucket.isNormal())
         {
-            // Record any empty buckets we find, if we don't find the bucket with our string key, we want to return an empty one to plop it into.
+            // Record any empty buckets we find,
+            // if we don't find the bucket with our string key, we want to return an empty one to plop it into.
             valid_empty_bucket = bucket;
         }
         else
@@ -181,63 +244,81 @@ std::optional<std::reference_wrapper<HashTableBucket>> HashTable::get_bucket(con
     // If no buckets were found with our string key, return an empty bucket if there is one
     if (valid_empty_bucket != std::nullopt)
     {
-        return valid_empty_bucket.value();
+        return valid_empty_bucket.value(); // O(1)
     }
     else // if there is no string key and no empty bucket, then add a new empty bucket and return it
     {
-        bucket_group.emplace_back(HashTableBucket());
+        bucket_group.emplace_back(HashTableBucket()); // O(1)
         return bucket_group.back();
     }
 }
 /**
  * Returns const optional reference to a bucket with key at bucket group at an index defined by key
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(N)
+ *
  * @param key
  * @return
  */
 std::optional<std::reference_wrapper<HashTableBucket>> HashTable::get_bucket(const std::string& key) const
 {
-    std::vector<HashTableBucket>& bucket_group = this->get_bucket_group(key);
     // Check if key already exists
-    for (HashTableBucket& bucket : bucket_group)
+    std::vector<HashTableBucket>& bucket_group = this->get_bucket_group(key); // O(1)
+    std::optional<std::reference_wrapper<HashTableBucket>> valid_empty_bucket;
+    // Iterate through all the buckets and try and find the bucket with our string key
+    for (HashTableBucket& bucket : bucket_group) // O(1) to O(N)
     {
-        if (bucket.getKey() == key)
+        if (!bucket.isNormal())
         {
-            return bucket;
+            // Record any empty buckets we find,
+            // if we don't find the bucket with our string key, we want to return an empty one to plop it into.
+            valid_empty_bucket = bucket;
+        }
+        else
+        {
+            if (bucket.getKey() == key)
+            {
+                return bucket;
+            }
         }
     }
-    return std::nullopt;
-}
-/**
- * Add new bucket group to the end of tableData
- *
- * @param newBuckets
- * @return
- */
-bool HashTable::push_back(const std::vector<HashTableBucket>& newBuckets)
-{
-    std::string new_key = newBuckets.front().getKey();
-    this->tableData->push_back(newBuckets);
-    this->set_size(this->size() + 1);
-    bool wasTableResized = this->resize_table();
-    return true;
+    // If no buckets were found with our string key, return an empty bucket if there is one
+    if (valid_empty_bucket != std::nullopt)
+    {
+        return valid_empty_bucket.value(); // O(1)
+    }
+    else // if there is no string key and no empty bucket, then add a new empty bucket and return it
+    {
+        bucket_group.emplace_back(HashTableBucket()); // O(1)
+        return bucket_group.back();
+    }
 }
 /**
  * Only a single constructor that takes an initial capacity for the table is
  * necessary. If no capacity is given, it defaults to 8 initially
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  * @param initCapacity
  * @return void
  */
 HashTable::HashTable(const size_t initCapacity) : numElements(0)
 {
-    this->tableData = new std::vector<std::vector<HashTableBucket>>(initCapacity, BucketGroupDefault);
-    this->tableData->reserve(initCapacity * 2);
+    this->tableData = new std::vector<std::vector<HashTableBucket>>(initCapacity, BucketGroupDefault); // O(1)
+    this->tableData->reserve(initCapacity * 2); // O(1)
 }
 /**
  * Insert a new key-value pair into the table. Duplicate keys are NOT allowed. The
  * method should return true if the insertion was successful. If the insertion was
  * unsucessful, such as when a duplicate is attempted to be inserted, the method
  * should return false
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(N)
+ *
+ * Exception Worst Case Complexity: O(N^2)
+ * - If the table needs reindexed, the complexity for that can be O(N^2), so overall = O(N + N^2) = O(N^2)
  *
  * @param key
  * @param value
@@ -246,8 +327,10 @@ HashTable::HashTable(const size_t initCapacity) : numElements(0)
 bool HashTable::insert(std::string key, size_t value)
 {
     // Check if key already exists
+
+    // Average O(1), Worst O(N)
     auto bucket = get_bucket(key);
-    if (bucket != std::nullopt)
+    if (bucket != std::nullopt) // O(1)
     {
         if (!bucket->get().isNormal())
         {
@@ -257,6 +340,7 @@ bool HashTable::insert(std::string key, size_t value)
             // Set bucket type to normal
             bucket->get().setNormal();
             this->set_size(this->size() + 1);
+            // Average O(N), Worst O(N^2)
             bool wasTableResized = this->resize_table();
             return true;
         }
@@ -269,6 +353,10 @@ bool HashTable::insert(std::string key, size_t value)
 
 /**
  * Similar to Insert except if bucket exists at key it updates the value and returns true. Does not add to table if not found.
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(N)
+ *
  * @param key
  * @param value
  * @return
@@ -276,6 +364,8 @@ bool HashTable::insert(std::string key, size_t value)
 bool HashTable::update(const std::string& key, const size_t value)
 {
     // Check if key already exists
+
+    // Average O(1), Worst O(N)
     auto bucket = get_bucket(key);
     if (bucket != std::nullopt)
     {
@@ -295,12 +385,17 @@ bool HashTable::update(const std::string& key, const size_t value)
  * If the key is in the table, remove will “erase” the key-value pair from the
  * table. This might just be marking a bucket as empty-after-remove
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(N)
+ *
  * @param key
  * @return
  */
 bool HashTable::remove(std::string key)
 {
     // Check if key already exists
+
+    // Average O(1), Worst O(N)
     auto bucket = get_bucket(key);
     if (bucket != std::nullopt)
     {
@@ -324,15 +419,16 @@ bool HashTable::remove(std::string key)
 /**
  * contains returns true if the key is in the table and false if the key is not in
  * the table.
- *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(N)
  * @param key
  * @return
  */
 bool HashTable::contains(std::string key) const
 {
-    std::vector<HashTableBucket> bucket_group = this->get_bucket_group(key);
+    std::vector<HashTableBucket> bucket_group = this->get_bucket_group(key); // O(1)
     // Search the bucket group for a bucket with the given key
-    for (HashTableBucket &bucket : bucket_group)
+    for (HashTableBucket &bucket : bucket_group) // O(N)
     {
         if (bucket.getKey() == key)
         {
@@ -360,13 +456,17 @@ bool HashTable::contains(std::string key) const
  * signify the return value is invalid. It's also much better than throwing an
  * exception if the key is not found.
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(N)
+ *
  * @param key
  * @return
  */
 std::optional<size_t> HashTable::get(const std::string& key) const
 {
+    // Average O(1), Worst O(N)
     auto bucket = get_bucket(key);
-    if (bucket != std::nullopt)
+    if (bucket != std::nullopt) // O(1)
     {
         if (bucket->get().isNormal())
         {
@@ -389,12 +489,17 @@ std::optional<size_t> HashTable::get(const std::string& key) const
  * results in undefined behavior. Simply put, you do not need to address attempts
  * to access keys not in the table inside the bracket operator method.
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(N)
+ *
  * @param key
  * @return
  */
 size_t& HashTable::operator[](const std::string& key)
 {
     // Check if key already exists
+
+    // Average O(1), Worst O(N)
     auto bucket = get_bucket(key);
     if (bucket != std::nullopt)
     {
@@ -411,14 +516,17 @@ size_t& HashTable::operator[](const std::string& key)
  * with all of the keys currently in the table. The length of the vector should be
  * the same as the size of the hash table.
  *
+ * Average Case Complexity: O(N)
+ * Worst Case Complexity: O(N^2)
+ *
  * @return
  */
 std::vector<std::string> HashTable::keys() const
 {
     std::vector<std::string> return_keys;
-    for (std::vector<HashTableBucket> &bucket_group : *(this->tableData))
+    for (std::vector<HashTableBucket> &bucket_group : *(this->tableData)) // O(N)
     {
-        for (const HashTableBucket& bucket : bucket_group)
+        for (const HashTableBucket& bucket : bucket_group) // O(N) worst
         {
             return_keys.push_back(bucket.getKey());
         }
@@ -432,6 +540,9 @@ std::vector<std::string> HashTable::keys() const
  * C++ like:
  *  static_cast<double>(num)
  * The time complexity for this method must be O(1).
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @return
  */
@@ -452,6 +563,9 @@ double HashTable::alpha() const
  * capacity returns how many buckets in total are in the hash table. The time
  * complexity for this algorithm must be O(1).
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @return
  */
 size_t HashTable::capacity() const
@@ -462,6 +576,9 @@ size_t HashTable::capacity() const
  * The size method returns how many key-value pairs are in the hash table. The
  * time complexity for this method must be O(1)
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @return
  */
 size_t HashTable::size() const
@@ -471,6 +588,9 @@ size_t HashTable::size() const
 /**
  * Change the number of elements if we add or remove from the table
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @param new_num_elements
  */
 void HashTable::set_size(const size_t new_num_elements)
@@ -479,6 +599,9 @@ void HashTable::set_size(const size_t new_num_elements)
 }
 /**
  * Size returns the number of key-value pairs in the vector, vector_size returns the actual TableData.size() including all the empty buckets
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @return
  */
@@ -503,6 +626,9 @@ size_t HashTable::vector_size() const
  *  Bucket 2: <Juliet, 1623>
  *  Bucket 11: <Hugo, 42108>
  *
+ * Average Case Complexity: O(N)
+ * Worst Case Complexity: O(N^2)
+ *
  * @param os
  * @param hashTable
  * @return
@@ -510,11 +636,11 @@ size_t HashTable::vector_size() const
 std::ostream& operator<<(std::ostream& os, const HashTable& hashTable)
 {
     const size_t init_size = hashTable.vector_size();
-    for (size_t i = 0; i < init_size; i++)
+    for (size_t i = 0; i < init_size; i++) // O(N)
     {
 
         os << "Bucket " << i << ": ";
-        for (const HashTableBucket& bucket : hashTable.tableData->at(i))
+        for (const HashTableBucket& bucket : hashTable.tableData->at(i)) // O(N) worst
         {
             os << bucket << " ";
         }

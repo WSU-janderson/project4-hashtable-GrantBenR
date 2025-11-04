@@ -15,11 +15,18 @@
 
 /**
  * The default constructor can simply set the bucket type to ESS.
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  */
 HashTableBucket::HashTableBucket() : bucket_type(BucketType::ESS), bucket_value(0){}
 /**
  * A parameterized constructor could initialize the key and value, as
  * well as set the bucket type to NORMAL.
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @param key (std::string)
  * @param value (size_t)
@@ -28,6 +35,9 @@ HashTableBucket::HashTableBucket(std::string key, size_t value) : bucket_type(Bu
 /**
  * A load method could load the key-value pair into the bucket, which
  * should then also mark the bucket as NORMAL.
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @param key (std::string)
  * @param value (size_t)
@@ -43,6 +53,9 @@ void HashTableBucket::load(std::string key, size_t value)
  * This method would return whether the bucket is empty, regardless of
  * if it has had data placed in it or not.
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @return
  */
 bool HashTableBucket::isEmpty() const
@@ -54,6 +67,9 @@ bool HashTableBucket::isEmpty() const
 /**
  * Is bucketType == BucketType::Normal
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @return
  */
 bool HashTableBucket::isNormal() const
@@ -62,6 +78,9 @@ bool HashTableBucket::isNormal() const
 }
 /**
  * Is bucketType == BucketType::ESS
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @return
  */
@@ -72,6 +91,9 @@ bool HashTableBucket::isEmptySinceStart() const
 /**
  * Is bucketType == BucketType::Normal
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @return
  */
 bool HashTableBucket::isEmptyAfterRemove() const
@@ -80,6 +102,9 @@ bool HashTableBucket::isEmptyAfterRemove() const
 }
 /**
  * Getter for bucketType enum variable
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @return
  */
@@ -90,6 +115,9 @@ BucketType HashTableBucket::getBucketType() const
 /**
  * Getter for this->bucket_key
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @return
  */
 std::string HashTableBucket::getKey() const
@@ -98,6 +126,9 @@ std::string HashTableBucket::getKey() const
 }
 /**
  * Getter for this->bucket_value
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @return
  */
@@ -108,6 +139,9 @@ size_t HashTableBucket::getValue() const
 /**
  * Getter for reference to this->bucket_value
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @return
  */
 size_t& HashTableBucket::getValueRef()
@@ -116,6 +150,10 @@ size_t& HashTableBucket::getValueRef()
 }
 /**
  * Sets bucket_type to normal
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  */
 void HashTableBucket::setNormal()
 {
@@ -123,6 +161,10 @@ void HashTableBucket::setNormal()
 }
 /**
  * Sets bucket_type to empty since start
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  */
 void HashTableBucket::setEmptySinceStart()
 {
@@ -131,6 +173,10 @@ void HashTableBucket::setEmptySinceStart()
 
 /**
  * Sets bucket_type to empty after removal
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  */
 void HashTableBucket::setEmptyAfterRemove()
 {
@@ -138,6 +184,10 @@ void HashTableBucket::setEmptyAfterRemove()
 }
 /**
  * Setter for bucket key
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @param key_value
  */
 void HashTableBucket::setKey(std::string key_value)
@@ -146,6 +196,10 @@ void HashTableBucket::setKey(std::string key_value)
 }
 /**
  * Setter for bucket value
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @param input_value
  */
 void HashTableBucket::setValue(const size_t input_value)
@@ -154,6 +208,9 @@ void HashTableBucket::setValue(const size_t input_value)
 }
 /**
  * Equals operator for bucket. Simply sets bucket_type, key, and value
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @param bucket
  * @return
@@ -168,6 +225,9 @@ HashTableBucket& HashTableBucket::operator=(const HashTableBucket& bucket)
 /**
  * Boolean == operator. Checks bucket_type, key, and value
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @param bucket
  * @return
  */
@@ -180,6 +240,9 @@ bool HashTableBucket::operator==(const HashTableBucket& bucket) const
 }
 /**
  * Boolean != operator. Checks bucket_type, key, and value
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @param bucket
  * @return
@@ -194,6 +257,9 @@ bool HashTableBucket::operator!=(const HashTableBucket& bucket) const
 /**
  * Compares values of two buckets: less than
  *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
+ *
  * @param bucket
  * @return
  */
@@ -203,6 +269,9 @@ bool HashTableBucket::operator<(const HashTableBucket& bucket) const
 }
 /**
  * Compares values of two buckets: greater than
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @param bucket
  * @return
@@ -215,6 +284,9 @@ bool HashTableBucket::operator>(const HashTableBucket& bucket) const
  * The stream insertion operator could be overloaded to print the
  * bucket's contents. Or if preferred, you could write a print method
  * instead.
+ *
+ * Average Case Complexity: O(1)
+ * Worst Case Complexity: O(1)
  *
  * @param os
  * @param bucket
