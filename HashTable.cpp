@@ -349,6 +349,7 @@ bool HashTable::insert(std::string key, size_t value)
             return false;
         }
     }
+    return false;
 }
 
 /**
